@@ -1,13 +1,17 @@
 {
   "name": "framework-lens",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "A Firefox extension that detects frontend frameworks using runtime and DevTools signals.",
   "type": "module",
-  "packageManager": "bun@1.4.3",
-  "engines": { "bun": ">=1.4.3" },
+  "packageManager": "bun@1.4.4",
+  "engines": {
+    "bun": ">=1.4.4"
+  },
   "scripts": {
     "test": "bun test ./tests",
+    "format": "bun fmt",
+    "format:check": "bun fmt --check",
     "lint": "bun --bun ./node_modules/web-ext/bin/web-ext.js lint --source-dir extension --warnings-as-errors",
     "build": "bun scripts/build.mjs",
     "package": "bun run build && bun scripts/package.mjs",
@@ -15,6 +19,10 @@
     "icons": "bun scripts/icons.mjs"
   },
   "devDependencies": {
+    "@angular/common": "^22.2.3",
+    "@angular/compiler": "^22.2.3",
+    "@angular/core": "^22.2.3",
+    "@angular/platform-browser": "^22.2.3",
     "@babel/core": "^7.29.7",
     "alpinejs": "^3.17.5",
     "babel-preset-solid": "^1.9.16",
@@ -24,6 +32,7 @@
     "preact": "^11.0.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "rxjs": "^7.8.2",
     "solid-js": "^1.9.17",
     "svelte": "^5.57.3",
     "vue": "^3.5.44",

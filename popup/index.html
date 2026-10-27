@@ -1,24 +1,59 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="color-scheme" content="light dark">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Framework Lens</title>
-  <link rel="stylesheet" href="popup.css">
-  <script src="../src/catalog.js" defer></script>
-  <script src="popup.js" defer></script>
-</head>
-<body>
-  <header><div class="brand"><img src="../icons/lens.svg" width="25" height="25" alt=""><span>framework<span class="brand-light"> lens</span></span></div></header>
-  <main>
-    <div class="eyebrow"><span>CURRENT PAGE</span><span id="count" hidden></span></div>
-    <h1 id="headline">Checking frameworks…</h1>
-    <p class="domain" id="domain">Current website</p>
-    <div id="results" aria-live="polite" aria-busy="true"><div class="skeleton"></div></div>
-    <div id="empty" hidden><h2 id="empty-title">No framework detected</h2><p id="empty-description">This page may use static HTML, an unsupported framework, or a runtime without detectable signals.</p></div>
-    <details id="method" hidden><summary>Detection details<span aria-hidden="true">＋</span></summary><p>Detection uses framework runtime and DevTools signals. The main framework is estimated from sampled DOM ownership, then runtime evidence. Embedded frames are excluded.</p><p id="sampling" hidden>DOM sampling limit reached.</p><ul id="signals"></ul></details>
-  </main>
-  <footer><button id="refresh" type="button" title="Rescan this page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 6.1a8.3 8.3 0 0 1 13.6 5.2M4.3 12.7a8.3 8.3 0 0 0 13.6 5.2"/></svg><span>Rescan</span></button></footer>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Framework Lens</title>
+    <link rel="stylesheet" href="popup.css" />
+    <script src="../src/catalog.js" defer></script>
+    <script src="popup.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <img src="../icons/lens.svg" width="25" height="25" alt="" /><span
+          >framework<span class="brand-light"> lens</span></span
+        >
+      </div>
+    </header>
+    <main>
+      <div class="eyebrow"><span>CURRENT PAGE</span><span id="count" hidden></span></div>
+      <h1 id="headline">Checking frameworks…</h1>
+      <p class="domain" id="domain">Current website</p>
+      <div id="results" aria-live="polite" aria-busy="true"><div class="skeleton"></div></div>
+      <div id="empty" hidden>
+        <h2 id="empty-title">No framework detected</h2>
+        <p id="empty-description">
+          This page may use static HTML, an unsupported framework, or a runtime without detectable
+          signals.
+        </p>
+      </div>
+      <details id="method" hidden>
+        <summary>Detection details<span aria-hidden="true">＋</span></summary>
+        <p>
+          Detection uses framework runtime and DevTools signals. The main framework is estimated
+          from sampled DOM ownership, then runtime evidence. Embedded frames are excluded.
+        </p>
+        <p id="sampling" hidden>DOM sampling limit reached.</p>
+        <ul id="signals"></ul>
+      </details>
+    </main>
+    <footer>
+      <button id="refresh" type="button" title="Rescan this page">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          aria-hidden="true"
+        >
+          <path d="M20 7v5h-5M4 17v-5h5" />
+          <path d="M6.1 6.1a8.3 8.3 0 0 1 13.6 5.2M4.3 12.7a8.3 8.3 0 0 0 13.6 5.2" /></svg
+        ><span>Rescan</span>
+      </button>
+    </footer>
+  </body>
 </html>

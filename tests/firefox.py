@@ -30,7 +30,8 @@ service = Service(service_args=['--allow-system-access'])
 driver = webdriver.Firefox(options=options, service=service)
 driver.set_script_timeout(10)
 try:
-    addon = driver.install_addon(str(ROOT / 'dist' / 'framework-lens-1.0.0.xpi'), temporary=True)
+    version = json.loads((ROOT / 'manifest.json').read_text())['version']
+    addon = driver.install_addon(str(ROOT / 'dist' / f'framework-lens-{version}.xpi'), temporary=True)
     driver.set_context('chrome')
     uuid = json.loads(driver.execute_script('return Services.prefs.getStringPref("extensions.webextensions.uuids")'))[addon]
     driver.set_context('content')
@@ -53,16 +54,30 @@ try:
         driver.switch_to.window(page)
         driver.get(base + '/' + name + '.html')
         # Query without activating another tab: switching tabs triggers our rescan.
-        time.sleep(2.0 if name != 'late' else 3.8)
+        time.sleep(3.8 if name in ['late', 'angular-late'] else 2.0)
         result = WebDriverWait(driver, 10).until(lambda _: result_for(name) or False)
         actual = sorted(f['id'] for f in result['frameworks'])
         assert actual == sorted(expected), (name, actual, expected, result)
         print('PASS', name, actual, flush=True)
         return result
 
-    for framework in ['react','vue','svelte','solid','alpine','lit','preact']:
-        check(framework, [framework])
-    mixed = check('mixed', ['react','vue','svelte','solid','alpine','lit','preact'])
+    frameworks = ['react','vue','svelte','solid','alpine','lit','preact','angular']
+    for framework in frameworks:
+        result = check(framework, [framework])
+        if framework == 'angular':
+            signals = result['frameworks'][0]['signals']
+            assert 'angular-version' in signals and 'angular-context' in signals, result
+            driver.switch_to.window(page)
+            assert driver.execute_script('return typeof window.ng?.getComponent !== "function" && typeof window.ng?.probe !== "function" && !!document.querySelector("#angular button")')
+            driver.execute_script('document.querySelector("#angular").removeAttribute("ng-version"); history.pushState({}, "", "/angular-context")')
+            WebDriverWait(driver, 5).until(lambda _: result_for('angular-context')['frameworks'][0]['signals'] == ['angular-context'])
+            print('PASS Angular production without debug globals or version attribute', flush=True)
+    check('angular-dev', ['angular'])
+    driver.switch_to.window(page)
+    assert driver.execute_script('return typeof window.ng?.getComponent === "function" && !!document.querySelector("#angular-dev button")')
+    check('angular-ssr', ['angular'])
+    check('angular-late', ['angular'])
+    mixed = check('mixed', frameworks)
     assert mixed['frameworks'][0]['id'] == 'react', mixed
     check('plain', [])
     check('csp', ['react'])
@@ -104,7 +119,7 @@ try:
     driver.get(base + '/icons.html')
     assert driver.execute_async_script('''const done=arguments[arguments.length-1];Promise.all([...document.images].map(img=>img.decode())).then(()=>done(true),()=>done(false));''')
     driver.find_element('tag name','body').screenshot(str(ROOT / 'docs' / 'toolbar-icons.png'))
-    print('PASS all 49 framework and counter icons decode in Firefox', flush=True)
+    print('PASS all 64 framework and counter icons decode in Firefox', flush=True)
     print('PASS popup main/additional, empty and protected states', flush=True)
     print('PASS screenshots saved', flush=True)
 finally:

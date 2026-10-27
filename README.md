@@ -4,7 +4,7 @@ A Firefox extension that detects frontend frameworks. It shows the main framewor
 
 ![Framework Lens popup](docs/popup-light.png)
 
-Supports **React, Vue, Svelte, Solid, Alpine, Lit, and Preact**. The scope follows [Astro’s official frontend integrations](https://docs.astro.build/it/guides/framework-components/), with Lit included as an additional framework.
+Supports **React, Vue, Svelte, Solid, Alpine, Lit, Preact, and Angular**.
 
 ## What it does
 
@@ -18,7 +18,7 @@ The main framework is an **estimate**: the detector ranks frameworks by the numb
 
 ## Detection, with sources
 
-The detector uses the signals exposed by framework runtimes and recognized by their DevTools: renderer registrations, mounted app and virtual DOM roots, Svelte’s version registry, Solid hydration state, Alpine component state, and Lit version/render markers. It reads existing DevTools registrations and leaves their hooks available to the full DevTools extensions.
+The detector uses the signals exposed by framework runtimes and recognized by their DevTools: renderer registrations, mounted app and virtual DOM roots, Svelte’s version registry, Solid hydration state, Alpine component state, Lit version/render markers, and Angular’s root version attribute and Ivy view contexts. It reads existing DevTools registrations and leaves their hooks available to the full DevTools extensions.
 
 **It does not bundle or run the full DevTools implementations.** Detection code is written for this extension, with the upstream protocols and deliberate differences documented in [the detection reference](docs/detection.md). Alpine’s browser DevTools are community maintained; Lit detection uses its official runtime rather than claiming an official browser extension exists.
 
@@ -29,7 +29,8 @@ Detection never guesses from framework names in text, asset filenames, CSS class
 - The current top-level document and its **open shadow roots** are checked. Embedded frames are excluded, so a React advertisement does not identify an otherwise plain page as React.
 - Server-only components can leave no identifiable browser runtime. Svelte builds that disable version disclosure and Solid client-only builds without debug, hydration, or delegated-event markers can be invisible.
 - Solid’s `data-hk` attribute follows its DevTools detector but is a weaker SSR signal; the popup labels it as such.
-- Closed shadow roots, browser-protected pages, and frameworks outside the supported seven cannot be inspected.
+- Angular’s `ng-version` attribute follows its official DevTools detector and can survive server rendering. It does not prove that client bootstrap or hydration has completed.
+- Closed shadow roots, browser-protected pages, and frameworks outside the supported eight cannot be inspected.
 - Startup observation stops after eight seconds. A framework loaded much later may first appear when you activate the tab, navigate, or open/refresh the popup.
 - DOM sampling is bounded. Large or deeply nested pages may produce an incomplete result, indicated in the detection details.
 - Websites control their own runtime markers. Detection is informative, not a security or technology audit.
@@ -49,7 +50,7 @@ Firefox removes temporary add-ons when it exits. Existing website tabs are scann
 
 ### Persistent installation
 
-`bun run package` creates `dist/framework-lens-1.0.0.xpi`.
+`bun run package` creates `dist/framework-lens-1.1.0.xpi`.
 
 For regular Firefox, use a [Mozilla-signed package](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/), which can be self-distributed without a public store listing. This repository does not include signing credentials or a signed release.
 
@@ -57,7 +58,7 @@ Firefox Developer Edition also supports a persistent unsigned installation:
 
 1. In `about:config`, set `xpinstall.signatures.required` to `false`. This disables signature enforcement for all add-ons in that profile.
 2. Remove any temporary Framework Lens installation from `about:debugging`.
-3. Open `about:addons`, choose the gear menu → **Install Add-on From File…**, and select `dist/framework-lens-1.0.0.xpi`.
+3. Open `about:addons`, choose the gear menu → **Install Add-on From File…**, and select `dist/framework-lens-1.1.0.xpi`.
 4. Confirm installation. Framework Lens now remains installed after Firefox exits.
 
 This procedure follows [Mozilla’s Developer Edition installation instructions](https://extensionworkshop.com/documentation/develop/test-permission-requests/). The build and test scripts do not change security settings in your regular Firefox profile.
@@ -72,19 +73,20 @@ Per-tab results live in Firefox’s in-memory session storage and are removed wh
 
 ### Permissions
 
-| Permission | Purpose |
-| --- | --- |
-| HTTP/HTTPS website access | Read framework runtime markers and update the toolbar automatically. |
-| `scripting` | Inspect the page’s JavaScript environment, including existing tabs. |
-| `storage` | Keep small per-tab results in memory while Firefox suspends the background script. |
-| `webNavigation` | Trigger a scan when an SPA changes route without reloading the document. |
+| Permission                | Purpose                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| HTTP/HTTPS website access | Read framework runtime markers and update the toolbar automatically.               |
+| `scripting`               | Inspect the page’s JavaScript environment, including existing tabs.                |
+| `storage`                 | Keep small per-tab results in memory while Firefox suspends the background script. |
+| `webNavigation`           | Trigger a scan when an SPA changes route without reloading the document.           |
 
 ## Development and verification
 
-Requires **Bun 1.4.3 or newer**. Node.js and npm are not required. Dependencies are pinned in `bun.lock`; `bunfig.toml` forces dependency CLIs to run under Bun.
+Requires **Bun 1.4.4 or newer**. Node.js and npm are not required. Dependencies are pinned in `bun.lock`; `bunfig.toml` forces dependency CLIs to run under Bun and configures the built-in formatter.
 
 ```sh
 bun install --frozen-lockfile
+bun run format:check
 bun test
 bun run fixtures
 bun run package
@@ -95,7 +97,9 @@ The build scripts use Bun’s file and shell APIs. Bun’s test runner executes 
 
 The package contains only the extension sources and icons. No compilation or dependency code is included in the extension. To regenerate toolbar counters, run `bun run icons`.
 
-For integration checks against real, minified production builds of all seven frameworks in an isolated Firefox profile:
+Run `bun run format` to format the repository with `bun fmt`. Formatting uses 100-column lines, two spaces, single quotes, no semicolons, and ES5 trailing commas, as configured in `bunfig.toml`.
+
+For integration checks against real, minified production-mode builds of all eight frameworks, plus Angular development and SSR fixtures, in an isolated Firefox profile:
 
 ```sh
 python3 -m venv .venv

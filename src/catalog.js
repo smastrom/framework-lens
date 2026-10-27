@@ -8,8 +8,9 @@ globalThis.FrameworkLens = (() => {
     alpine: { name: 'Alpine', color: '#477482', site: 'https://alpinejs.dev/' },
     lit: { name: 'Lit', color: '#324fff', site: 'https://lit.dev/' },
     preact: { name: 'Preact', color: '#673ab8', site: 'https://preactjs.com/' },
-  };
-  const ids = Object.keys(frameworks);
+    angular: { name: 'Angular', color: '#e40035', site: 'https://angular.dev/' },
+  }
+  const ids = Object.keys(frameworks)
   // Page-world data is untrusted. Only these fixed codes can reach the popup.
   const evidence = {
     'react-renderer': 'React DevTools renderer registration',
@@ -30,25 +31,45 @@ globalThis.FrameworkLens = (() => {
     'alpine-node': 'Alpine initialized component',
     'lit-runtime': 'Lit version registry',
     'lit-node': 'Lit render part / element',
-  };
+    'angular-version': 'Angular root version attribute (including SSR)',
+    'angular-context': 'Angular Ivy component / view context',
+  }
   function sanitize(input) {
-    if (!input || !Array.isArray(input.frameworks)) return null;
-    const seen = new Set();
-    const items = [];
-    for (const item of input.frameworks.slice(0, 7)) {
-      if (!item || !ids.includes(item.id) || seen.has(item.id)) continue;
+    if (!input || !Array.isArray(input.frameworks)) return null
+    const seen = new Set()
+    const items = []
+    for (const item of input.frameworks.slice(0, ids.length)) {
+      if (!item || !ids.includes(item.id) || seen.has(item.id)) continue
       const signals = Array.isArray(item.signals)
-        ? [...new Set(item.signals.filter(s => typeof s === 'string' && s.startsWith(item.id + '-') && Object.hasOwn(evidence, s)))].slice(0, 4)
-        : [];
-      if (!signals.length) continue;
-      seen.add(item.id);
-      items.push({ id: item.id, signals, coverage: Number.isFinite(item.coverage) ? Math.min(4000, Math.max(0, Math.round(item.coverage))) : 0 });
+        ? [
+            ...new Set(
+              item.signals.filter(
+                (s) =>
+                  typeof s === 'string' && s.startsWith(item.id + '-') && Object.hasOwn(evidence, s)
+              )
+            ),
+          ].slice(0, 4)
+        : []
+      if (!signals.length) continue
+      seen.add(item.id)
+      items.push({
+        id: item.id,
+        signals,
+        coverage: Number.isFinite(item.coverage)
+          ? Math.min(4000, Math.max(0, Math.round(item.coverage)))
+          : 0,
+      })
     }
-    items.sort((a, b) => b.coverage - a.coverage || strength(b) - strength(a) || ids.indexOf(a.id) - ids.indexOf(b.id));
-    return { frameworks: items, truncated: input.truncated === true };
+    items.sort(
+      (a, b) =>
+        b.coverage - a.coverage ||
+        strength(b) - strength(a) ||
+        ids.indexOf(a.id) - ids.indexOf(b.id)
+    )
+    return { frameworks: items, truncated: input.truncated === true }
   }
   function strength(item) {
-    return item.signals.every(s => s === 'solid-marker') ? 0 : 1;
+    return item.signals.every((s) => s === 'solid-marker') ? 0 : 1
   }
-  return { frameworks, ids, evidence, sanitize };
-})();
+  return { frameworks, ids, evidence, sanitize }
+})()
