@@ -1,0 +1,9 @@
+node_modules/
+extension/
+dist/
+tests/.fixtures/
+.DS_Store
+.venv/
+
+__pycache__/
+*.pyc

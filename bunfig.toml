@@ -1,0 +1,4 @@
+[run]
+# Run dependency CLIs with Bun even when their shebang requests Node.js.
+bun = true
+shell = "bun"
