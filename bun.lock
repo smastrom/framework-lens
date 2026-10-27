@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "framework-lens",
+      "name": "framework-lens-firefox",
       "devDependencies": {
         "@angular/common": "^22.2.3",
         "@angular/compiler": "^22.2.3",
